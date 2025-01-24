@@ -66,3 +66,7 @@ This guide covers the following key areas:
 
 #Output
 
+![Image](https://github.com/user-attachments/assets/1d261bbe-f993-472a-b7f5-0e65a27264d2)
+
+![Image](https://github.com/user-attachments/assets/274f5518-4dee-4eeb-a322-cecab92c7bda)
+
