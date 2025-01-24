@@ -1,0 +1,121 @@
+#BACKUP MYSQL DATABASE
+
+Command:
+mysqldump -u [username] -p [database_name] > mysql_backup.sql
+
+#SCHEMA CONVERSION
+
+MySQL Schema (Original):
+
+CREATE TABLE employees (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    active TINYINT(1),
+    created_at DATETIME
+);
+
+Converted PostgreSQL Schema:
+
+CREATE TABLE employees (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    active BOOLEAN,
+    created_at TIMESTAMP
+);
+
+#DATA EXPORT
+
+Export MySQL Data to CSV:
+
+SELECT * INTO OUTFILE '/tmp/employees.csv'
+FIELDS TERMINATED BY ',' ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+FROM employees;
+
+Export Data (SQL Script):
+
+mysqldump -u [username] -p --no-create-info [database_name] > mysql_data.sql
+
+#DATA IMPORT
+
+Import Data into PostgreSQL Using CSV:
+
+COPY employees (id, name, active, created_at)
+FROM '/tmp/employees.csv'
+DELIMITER ','
+CSV HEADER;
+
+Using pgloader (Configuration Script):
+
+Save this configuration as migration.load:
+
+LOAD DATABASE
+     FROM mysql://[username]:[password]@localhost/[mysql_database]
+     INTO postgresql://[username]:[password]@localhost/[postgres_database]
+
+WITH include no drop, create tables, create indexes, reset sequences
+
+SET work_mem to '16MB', maintenance_work_mem to '512MB'
+
+CAST type tinyint when (= precision 1) to boolean using (if zero then 'f' else 't')
+CAST type datetime to timestamp;
+
+BEFORE LOAD DO
+$$ create schema if not exists public; $$;
+
+Run the command:
+
+pgloader migration.load
+
+#VERIFICATION
+
+Row Count Check:
+
+On MySQL:
+
+SELECT COUNT(*) FROM employees;
+
+On PostgreSQL:
+
+SELECT COUNT(*) FROM employees;
+
+Random Record Check:
+
+SELECT * FROM employees LIMIT 10;
+
+Null Value Check:
+
+SELECT * FROM employees WHERE active IS NULL;
+
+#APPLICATION CONFIGURATION
+
+Update the database connection in your application. Example (PostgreSQL):
+
+{
+  "database": {
+    "host": "localhost",
+    "port": 5432,
+    "user": "[username]",
+    "password": "[password]",
+    "database": "[postgres_database]"
+  }
+}
+
+#DELIVERABLES
+
+1. Scripts:
+
+mysql_backup.sql (MySQL backup).
+
+PostgreSQL schema script.
+
+Data migration scripts (pgloader or CSV import).
+
+2. Report Template:
+
+Row counts.
+
+Examples of random record checks.
+
+Any challenges and resolutions encountered.
+
